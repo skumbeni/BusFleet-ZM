@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BusFleet Pro Zambia | Transport Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #008751; /* Zambia Green-ish tone for branding or keep corporate blue */
+            --primary-dark: #005c37;
+            --brand-accent: #ff9800; /* Zambia Orange/Black accent */
+            --secondary: #64748b;
+            --bg-body: #f1f5f9;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --text-light: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --sidebar-width: 260px;
+            --header-height: 64px;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        body { background-color: var(--bg-body); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+
+        /* --- Sidebar --- */
+        aside {
+            width: var(--sidebar-width);
+            background-color: #0f172a;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            z-index: 100;
+        }
+
+        .brand {
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            font-size: 1.25rem;
+            font-weight: bold;
+            border-bottom: 1px solid #1e293b;
+            background: linear-gradient(90deg, #008751 0%, #005c37 100%); /* Zambian flag green vibe */
+        }
+        .brand span { color: white; margin-left: 5px; }
+        .brand i { color: #ff9800; /* Orange accent */ }
+
+        nav { flex: 1; padding: 20px 0; overflow-y: auto; }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #94a3b8;
+            text-decoration: none;
+            cursor: pointer;
+            transition: 0.2s;
+            border-left: 3px solid transparent;
+        }
+        .nav-item:hover, .nav-item.active { background-color: #1e293b; color: white; border-left-color: #ff9800; }
+        .nav-item i { width: 24px; margin-right: 10px; }
+
+        .subscription-tag {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            margin: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+        .sub-plan { font-weight: bold; font-size: 1rem; display: block; margin-bottom: 5px; }
+        .btn-upgrade { background: rgba(255,255,255,0.2); border: none; color: white; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-top: 5px; width: 100%; }
+
+        /* --- Main Content --- */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        header {
+            height: var(--header-height);
+            background: var(--bg-card);
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+        }
+
+        .header-left h2 { font-size: 1.2rem; }
+        
+        .header-right { display: flex; gap: 20px; align-items: center; }
+        .currency-select, .location-select {
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            background: #f8fafc;
+            color: var(--text-main);
+            outline: none;
+            cursor: pointer;
+        }
+        .user-profile { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+
+        /* --- Content Views --- */
+        #content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+        }
+
+        .view-section { display: none; animation: fadeIn 0.3s ease; }
+        .view-section.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- Dashboard Grid --- */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .kpi-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px; }
+        .kpi-icon { width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        .icon-green { background: #d1fae5; color: var(--primary); }
+        .icon-blue { background: #dbeafe; color: #2563eb; }
+        .icon-orange { background: #ffedd5; color: var(--warning); }
+        .icon-red { background: #fee2e2; color: var(--danger); }
+        .kpi-value { font-size: 1.6rem; font-weight: bold; margin-bottom: 5px; }
+        .kpi-label { font-size: 0.85rem; color: var(--text-light); }
+        .kpi-trend { font-size: 0.8rem; font-weight: 600; }
+        .trend-up { color: var(--success); }
+        .trend-down { color: var(--danger); }
+
+        /* --- Panels --- */
+        .panel-row { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 30px; }
+        .panel {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .panel-title { font-size: 1.1rem; font-weight: 600; }
+
+        /* --- Charts --- */
+        .chart-container { height: 250px; display: flex; align-items: flex-end; gap: 15px; padding-bottom: 20px; border-bottom: 1px solid #e2e8f0; }
+        .bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; height: 100%; justify-content: flex-end; }
+        .bar { width: 100%; background: var(--primary); border-radius: 4px 4px 0 0; transition: height 1s ease; position: relative; }
+        .bar:hover { opacity: 0.8; }
+        .bar::after { content: attr(data-value); position: absolute; top: -25px; left: 50%; transform: translateX(-50%); font-size: 0.75rem; font-weight: bold; color: #333;}
+        .bar-label { font-size: 0.75rem; color: var(--text-light); text-align: center; }
+
+        /* --- Tables --- */
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th { text-align: left; padding: 12px 15px; color: var(--text-light); font-size: 0.85rem; border-bottom: 2px solid #e2e8f0; }
+        .data-table td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 0.95rem; }
+        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+        .status-active { background: #d1fae5; color: var(--primary); }
+        .status-maint { background: #fee2e2; color: var(--danger); }
+        .status-route { background: #dbeafe; color: #2563eb; }
+
+        /* --- 2D Interactive Tools --- */
+        
+        /* Seat Map */
+        .seat-map-container {
+            display: flex;
+            gap: 40px;
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .bus-layout {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            padding: 20px;
+            background: white;
+            border: 2px solid #cbd5e1;
+            border-radius: 30px;
+            position: relative;
+        }
+        .driver-seat { grid-column: 4; background: #94a3b8; border-radius: 5px; width: 30px; height: 30px; margin-bottom: 10px; }
+        .seat {
+            width: 35px;
+            height: 35px;
+            background: white;
+            border: 2px solid #cbd5e1;
+            border-radius: 5px 5px 10px 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            position: relative;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+        }
+        .seat:hover:not(.occupied) { border-color: var(--primary); background: #eff6ff; color: var(--primary); }
+        .seat.occupied { background: #cbd5e1; border-color: #94a3b8; cursor: not-allowed; color: white; }
+        .seat.selected { background: var(--primary); border-color: var(--primary-dark); box-shadow: 0 0 10px rgba(0, 135, 81, 0.4); color: white; }
+        .aisle { grid-column: 3 / 4; }
+
+        .booking-summary { flex: 1; padding: 20px; background: white; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .payment-btn { display: block; width: 100%; padding: 12px; margin-top: 10px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s; color: white; text-align: left; padding-left: 20px; }
+        .btn-mtn { background: #ffcc00; color: #000; }
+        .btn-airtel { background: #ed1c24; }
+        .btn-zamtel { background: #00a651; }
+        .btn-card { background: #2563eb; }
+        .payment-btn:hover { opacity: 0.9; }
+
+        /* Route Visualizer */
+        #routeCanvas { background: #1e293b; border-radius: 8px; width: 100%; height: 300px; }
+
+        /* Subscription Cards */
+        .sub-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .sub-card {
+            background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 30px; text-align: center; transition: 0.3s;
+        }
+        .sub-card:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: var(--shadow); }
+        .sub-card.pro { border: 2px solid var(--primary); position: relative; }
+        .sub-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; }
+        .price { font-size: 2.5rem; font-weight: bold; margin: 20px 0; color: var(--text-main); }
+        .price span { font-size: 1rem; color: var(--text-light); font-weight: normal; }
+        .features-list { list-style: none; text-align: left; margin: 20px 0; color: var(--secondary); }
+        .features-list li { margin-bottom: 10px; }
+        .features-list li i { color: var(--success); margin-right: 10px; }
+
+        /* Toast */
+        #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 1000; }
+        .toast {
+            background: white; border-left: 4px solid var(--primary); padding: 15px 20px; margin-top: 10px; border-radius: 4px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 15px; animation: slideIn 0.3s ease;
+        }
+        .toast.success { border-left-color: var(--success); }
+        .toast.error { border-left-color: var(--danger); }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
+            .panel-row { grid-template-columns: 1fr; }
+            .sub-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            aside { position: absolute; transform: translateX(-100%); height: 100%; }
+            aside.open { transform: translateX(0); }
+            .dashboard-grid { grid-template-columns: 1fr; }
+            #mobile-menu-btn { display: block; }
+        }
+        #mobile-menu-btn { display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-main); }
+    </style>
+</head>
+<body>
+
+    <aside id="sidebar">
+        <div class="brand">
+            <i class="fa-solid fa-bus-simple"></i>
+            <span>BusFleet ZM</span>
+        </div>
+        
+        <nav>
+            <a class="nav-item active" onclick="navigate('dashboard')">
+                <i class="fa-solid fa-chart-line"></i> Dashboard
+            </a>
+            <a class="nav-item" onclick="navigate('fleet')">
+                <i class="fa-solid fa-truck-front"></i> Fleet Management
+            </a>
+            <a class="nav-item" onclick="navigate('ticketing')">
+                <i class="fa-solid fa-ticket"></i> Ticketing & Sales
+            </a>
+            <a class="nav-item" onclick="navigate('routes')">
+                <i class="fa-solid fa-route"></i> Routes & Analytics
+            </a>
+            <a class="nav-item" onclick="navigate('finance')">
+                <i class="fa-solid fa-money-bill-trend-up"></i> Finance & P&L
+            </a>
+            <a class="nav-item" onclick="navigate('subscription')">
+                <i class="fa-solid fa-rocket"></i> Subscription
+            </a>
+        </nav>
+
+        <div class="subscription-tag">
+            <span class="sub-plan">Professional Plan</span>
+            <span>18/20 Buses Active</span>
+            <button class="btn-upgrade" onclick="navigate('subscription')">Manage Plan</button>
+        </div>
+    </aside>
+
+    <main>
+        <header>
+            <div class="header-left">
+                <button id="mobile-menu-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+                <h2 id="page-title">Executive Dashboard</h2>
+            </div>
+            <div class="header-right">
+                <select class="currency-select" id="currencyToggle" onchange="changeCurrency()">
+                    <option value="ZMW" selected>ZMW (Kwacha)</option>
+                    <option value="USD">USD ($)</option>
+                </select>
+                <select class="location-select" id="locationFilter">
+                    <option value="all">National Operations</option>
+                    <option value="lusaka">Region: Lusaka</option>
+                    <option value="copperbelt">Region: Copperbelt</option>
+                    <option value="southern">Region: Southern</option>
+                </select>
+                <div class="user-profile">
+                    <img src="https://picsum.photos/seed/zambia/100/100" class="avatar" alt="User">
+                    <div style="display:none; @media(min-width:768px){display:block;}">
+                        <span style="font-size:0.9rem; font-weight:600;">Chileshe Mwamba</span><br>
+                        <span style="font-size:0.75rem; color:var(--text-light);">Ops Manager</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div id="content-area">
+            
+            <!-- VIEW: DASHBOARD -->
+            <section id="dashboard" class="view-section active">
+                <div class="dashboard-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <div>
+                                <div class="kpi-value" id="kpi-revenue">ZMW 0</div>
+                                <div class="kpi-label">Gross Monthly Revenue</div>
+                            </div>
+                            <div class="kpi-icon icon-green"><i class="fa-solid fa-money-bill-wave"></i></div>
+                        </div>
+                        <div class="kpi-trend trend-up"><i class="fa-solid fa-arrow-trend-up"></i> +12.5% vs last month</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <div>
+                                <div class="kpi-value">94%</div>
+                                <div class="kpi-label">Fleet Utilization</div>
+                            </div>
+                            <div class="kpi-icon icon-blue"><i class="fa-solid fa-gauge-high"></i></div>
+                        </div>
+                        <div class="kpi-trend trend-up"><i class="fa-solid fa-arrow-up"></i> +2% efficiency</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <div>
+                                <div class="kpi-value">12,500</div>
+                                <div class="kpi-label">Passengers Transported</div>
+                            </div>
+                            <div class="kpi-icon icon-orange"><i class="fa-solid fa-users"></i></div>
+                        </div>
+                        <div class="kpi-trend trend-down"><i class="fa-solid fa-arrow-down"></i> -1% holiday dip</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <div>
+                                <div class="kpi-value" id="kpi-expenses">ZMW 0</div>
+                                <div class="kpi-label">Total Expenses (Fuel/Maint)</div>
+                            </div>
+                            <div class="kpi-icon icon-red"><i class="fa-solid fa-wrench"></i></div>
+                        </div>
+                        <div class="kpi-trend trend-up"><i class="fa-solid fa-triangle-exclamation"></i> +5% Fuel Cost</div>
+                    </div>
+                </div>
+
+                <div class="panel-row">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <div class="panel-title">Revenue by Route</div>
+                            <select style="border:1px solid #ddd; padding:4px;"><option>This Month</option></select>
+                        </div>
+                        <div class="chart-container" id="revenueChart">
+                            <!-- Bars injected by JS -->
+                        </div>
+                    </div>
+                    <div class="panel">
+                        <div class="panel-header">
+                            <div class="panel-title">Revenue Collection Mix</div>
+                        </div>
+                        <div style="display:flex; justify-content:center; align-items:center; height:200px;">
+                            <div style="width:150px; height:150px; border-radius:50%; background: conic-gradient(var(--primary) 0% 45%, #10b981 45% 75%, #f59e0b 75% 90%, #ef4444 90% 100%);"></div>
+                        </div>
+                        <div style="display:flex; justify-content:space-around; font-size:0.8rem; margin-top:10px;">
+                            <span style="color:var(--primary)">● Mobile Money</span>
+                            <span style="color:var(--success)">● Card</span>
+                            <span style="color:var(--warning)">● Cash</span>
+                            <span style="color:var(--danger)">● Leak</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">Daily Revenue Reconciliation</div>
+                        <button class="btn-upgrade" style="background:var(--primary); color:white; margin:0;">Download Report</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Bus Reg.</th>
+                                <th>Driver</th>
+                                <th>Route</th>
+                                <th>Expected</th>
+                                <th>Collected</th>
+                                <th>Variance</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="revenueTableBody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- VIEW: FLEET -->
+            <section id="fleet" class="view-section">
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">Fleet Overview</div>
+                        <div style="display:flex; gap:10px;">
+                            <button style="padding:8px 16px; border:1px solid #ddd; background:white; border-radius:4px;"><i class="fa-solid fa-filter"></i> Filter</button>
+                            <button style="padding:8px 16px; background:var(--primary); color:white; border:none; border-radius:4px;"><i class="fa-solid fa-plus"></i> Add Bus</button>
+                        </div>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Registration</th>
+                                <th>Model</th>
+                                <th>Capacity</th>
+                                <th>Driver</th>
+                                <th>Depot</th>
+                                <th>Fuel Level</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fleetTableBody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- VIEW: TICKETING -->
+            <section id="ticketing" class="view-section">
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">Digital Ticketing Terminal</div>
+                    </div>
+                    <div style="display:flex; gap:20px; margin-bottom:20px;">
+                        <div style="flex:1;">
+                            <label style="display:block; margin-bottom:5px; font-weight:600;">Select Route</label>
+                            <select id="ticketRouteSelect" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;" onchange="updateSeatMap()">
+                                <option value="LUN-LVI">Lusaka - Livingstone (ZMW 350)</option>
+                                <option value="LUN-NDO">Lusaka - Ndola (ZMW 200)</option>
+                                <option value="LUN-KIT">Lusaka - Kitwe (ZMW 220)</option>
+                                <option value="LUN-MON">Lusaka - Mongu (ZMW 280)</option>
+                            </select>
+                        </div>
+                        <div style="flex:1;">
+                            <label style="display:block; margin-bottom:5px; font-weight:600;">Passenger Name</label>
+                            <input type="text" placeholder="Enter Name" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
+                        </div>
+                    </div>
+
+                    <div class="seat-map-container">
+                        <div class="bus-layout" id="seatMap">
+                            <!-- Seats generated by JS -->
+                            <div class="driver-seat" title="Driver"></div>
+                        </div>
+                        <div class="booking-summary">
+                            <h3>Booking Summary</h3>
+                            <div style="margin:20px 0; border-bottom:1px solid #eee; padding-bottom:20px;">
+                                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                                    <span>Route:</span> <strong id="summaryRoute">Lusaka - Livingstone</strong>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                                    <span>Seat(s):</span> <strong id="summarySeats">None</strong>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                                    <span>Unit Price:</span> <strong id="summaryPrice">ZMW 350.00</strong>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; margin-top:20px; font-size:1.2rem;">
+                                    <span>Total:</span> <strong id="summaryTotal">ZMW 0.00</strong>
+                                </div>
+                            </div>
+                            <h4>Payment Method</h4>
+                            <button class="payment-btn btn-mtn" onclick="processPayment('MTN Mobile Money')">
+                                <i class="fa-solid fa-mobile-screen"></i> MTN Mobile Money
+                            </button>
+                            <button class="payment-btn btn-airtel" onclick="processPayment('Airtel Money')">
+                                <i class="fa-solid fa-mobile-screen"></i> Airtel Money
+                            </button>
+                            <button class="payment-btn btn-zamtel" onclick="processPayment('Zamtel Kwacha')">
+                                <i class="fa-solid fa-mobile-screen"></i> Zamtel Kwacha
+                            </button>
+                            <button class="payment-btn btn-card" onclick="processPayment('Visa/Mastercard')">
+                                <i class="fa-regular fa-credit-card"></i> Visa/Mastercard
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: ROUTES -->
+            <section id="routes" class="view-section">
+                <div class="panel-row">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <div class="panel-title">Live Route Tracker (Lusaka - Livingstone)</div>
+                        </div>
+                        <canvas id="routeCanvas"></canvas>
+                        <div style="display:flex; gap:20px; margin-top:10px; justify-content:center; font-size:0.8rem; color:#94a3b8;">
+                            <span><i class="fa-solid fa-circle" style="color:#3b82f6"></i> Active Bus</span>
+                            <span><i class="fa-solid fa-circle" style="color:#10b981"></i> Stop</span>
+                            <span><i class="fa-solid fa-square" style="color:#f59e0b"></i> High Demand</span>
+                        </div>
+                    </div>
+                    <div class="panel">
+                        <div class="panel-header">
+                            <div class="panel-title">Top Performing Routes</div>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Route</th>
+                                    <th>Occupancy</th>
+                                    <th>Rev/Km</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Lusaka - Livingstone</td>
+                                    <td><div style="background:#e2e8f0; width:100px; height:8px; border-radius:4px;"><div style="background:var(--success); width:92%; height:100%; border-radius:4px;"></div></div> 92%</td>
+                                    <td>ZMW 12.50</td>
+                                </tr>
+                                <tr>
+                                    <td>Lusaka - Kitwe</td>
+                                    <td><div style="background:#e2e8f0; width:100px; height:8px; border-radius:4px;"><div style="background:var(--primary); width:78%; height:100%; border-radius:4px;"></div></div> 78%</td>
+                                    <td>ZMW 9.20</td>
+                                </tr>
+                                <tr>
+                                    <td>Kitwe - Solwezi</td>
+                                    <td><div style="background:#e2e8f0; width:100px; height:8px; border-radius:4px;"><div style="background:var(--warning); width:45%; height:100%; border-radius:4px;"></div></div> 45%</td>
+                                    <td>ZMW 8.10</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: FINANCE -->
+            <section id="finance" class="view-section">
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">Profit & Loss Statement</div>
+                        <button style="padding:8px 16px; border:1px solid #ddd; background:white;"><i class="fa-solid fa-download"></i> Export PDF</button>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Sub-Category</th>
+                                    <th>Budget</th>
+                                    <th>Actual</th>
+                                    <th>Variance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="background:#f8fafc; font-weight:bold;">
+                                    <td>INCOME</td>
+                                    <td></td>
+                                    <td>ZMW 4,500,000</td>
+                                    <td id="finance-income-actual">ZMW 4,250,000</td>
+                                    <td style="color:var(--danger)">-ZMW 250,000</td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td>Ticket Sales</td>
+                                    <td>ZMW 4,000,000</td>
+                                    <td>ZMW 3,850,000</td>
+                                    <td style="color:var(--danger)">-ZMW 150,000</td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td>Parcel Services</td>
+                                    <td>ZMW 400,000</td>
+                                    <td>ZMW 350,000</td>
+                                    <td style="color:var(--danger)">-ZMW 50,000</td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td>Advertising</td>
+                                    <td>ZMW 100,000</td>
+                                    <td>ZMW 50,000</td>
+                                    <td style="color:var(--danger)">-ZMW 50,000</td>
+                                </tr>
+                                <tr style="background:#f8fafc; font-weight:bold;">
+                                    <td>EXPENSES</td>
+                                    <td></td>
+                                    <td>ZMW 2,500,000</td>
+                                    <td id="finance-expense-actual">ZMW 2,450,000</td>
+                                    <td style="color:var(--success)">+ZMW 50,000</td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td>Fuel (Indeni)</td>
+                                    <td>ZMW 1,200,000</td>
+                                    <td>ZMW 1,300,000</td>
+                                    <td style="color:var(--danger)">-ZMW 100,000</td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td>Salaries</td>
+                                    <td>ZMW 800,000</td>
+                                    <td>ZMW 800,000</td>
+                                    <td>ZMW 0</td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td>Maintenance</td>
+                                    <td>ZMW 300,000</td>
+                                    <td>ZMW 250,000</td>
+                                    <td style="color:var(--success)">+ZMW 50,000</td>
+                                </tr>
+                                <tr style="border-top:2px solid #333;">
+                                    <td></td>
+                                    <td style="font-weight:bold;">NET PROFIT</td>
+                                    <td style="font-weight:bold;">ZMW 2,000,000</td>
+                                    <td style="font-weight:bold;">ZMW 1,800,000</td>
+                                    <td style="font-weight:bold; color:var(--danger);">-ZMW 200,000</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: SUBSCRIPTION -->
+            <section id="subscription" class="view-section">
+                <div style="text-align:center; margin-bottom:40px;">
+                    <h2>Upgrade Your Plan</h2>
+                    <p style="color:var(--text-light);">Scale your Zambian operations with advanced features.</p>
+                </div>
+                <div class="sub-grid">
+                    <div class="sub-card">
+                        <h3>Starter</h3>
+                        <div class="price" id="price-starter">ZMW 0<span>/mo</span></div>
+                        <p>For small operators</p>
+                        <ul class="features-list">
+                            <li><i class="fa-solid fa-check"></i> Up to 5 Buses</li>
+                            <li><i class="fa-solid fa-check"></i> Basic Ticketing</li>
+                            <li><i class="fa-solid fa-check"></i> Standard Reports</li>
+                            <li><i class="fa-solid fa-check"></i> Email Support</li>
+                        </ul>
+                        <button style="padding:10px 30px; border:1px solid var(--primary); background:white; color:var(--primary); border-radius:20px; cursor:pointer;">Current Plan</button>
+                    </div>
+                    <div class="sub-card pro">
+                        <div class="sub-badge">MOST POPULAR</div>
+                        <h3>Professional</h3>
+                        <div class="price" id="price-pro">ZMW 0<span>/mo</span></div>
+                        <p>For growing fleets</p>
+                        <ul class="features-list">
+                            <li><i class="fa-solid fa-check"></i> Up to 30 Buses</li>
+                            <li><i class="fa-solid fa-check"></i> Multi-Depot Support</li>
+                            <li><i class="fa-solid fa-check"></i> GPS Integration</li>
+                            <li><i class="fa-solid fa-check"></i> Mobile Money (MTN/Airtel/Zamtel)</li>
+                            <li><i class="fa-solid fa-check"></i> Driver App</li>
+                        </ul>
+                        <button style="padding:10px 30px; background:var(--primary); color:white; border:none; border-radius:20px; cursor:pointer;">Current Plan</button>
+                    </div>
+                    <div class="sub-card">
+                        <h3>Enterprise</h3>
+                        <div class="price" id="price-ent">ZMW 0<span>/mo</span></div>
+                        <p>For large networks</p>
+                        <ul class="features-list">
+                            <li><i class="fa-solid fa-check"></i> Unlimited Buses</li>
+                            <li><i class="fa-solid fa-check"></i> AI Analytics & Prediction</li>
+                            <li><i class="fa-solid fa-check"></i> API Integrations</li>
+                            <li><i class="fa-solid fa-check"></i> Dedicated Account Manager</li>
+                            <li><i class="fa-solid fa-check"></i> Custom White-labeling</li>
+                        </ul>
+                        <button style="padding:10px 30px; border:1px solid var(--text-light); background:white; color:var(--text-main); border-radius:20px; cursor:pointer;">Contact Sales</button>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <div id="toast-container"></div>
+
+    <script>
+        // --- CONFIGURATION & LOCALIZATION ---
+        const CONFIG = {
+            exchangeRate: 25.5, // 1 USD = 25.5 ZMW
+            currency: 'ZMW', // Default
+            currencySymbol: 'ZMW',
+            prices: {
+                starter: 1500, // ZMW
+                pro: 4000,     // ZMW
+                ent: 12000     // ZMW
+            }
+        };
+
+        const appState = {
+            buses: [
+                { reg: 'BAC 456', model: 'Yutong', capacity: 45, driver: 'J. Banda', depot: 'Lusaka', fuel: 80, status: 'active' },
+                { reg: 'CAC 998', model: 'Scania', capacity: 51, driver: 'M. Phiri', depot: 'Ndola', fuel: 45, status: 'active' },
+                { reg: 'BAD 112', model: 'Golden Dragon', capacity: 59, driver: 'C. Musonda', depot: 'Livingstone', fuel: 10, status: 'maint' },
+                { reg: 'BAF 221', model: 'Volvo', capacity: 49, driver: 'K. Mwale', depot: 'Kitwe', fuel: 92, status: 'route' },
+            ],
+            // Values stored in base ZMW
+            kpi: {
+                revenue: 4250000,
+                expenses: 2450000
+            },
+            chartData: [
+                { label: 'LUN-LVI', value: 1850 }, // In thousands ZMW
+                { label: 'LUN-NDO', value: 1200 },
+                { label: 'LUN-MON', value: 950 },
+                { label: 'NDO-KIT', value: 250 }
+            ],
+            ticketing: {
+                'LUN-LVI': 350,
+                'LUN-NDO': 200,
+                'LUN-KIT': 220,
+                'LUN-MON': 280
+            }
+        };
+
+        // --- CURRENCY UTILITIES ---
+        function formatMoney(amountInZMW) {
+            let displayAmount = amountInZMW;
+            let symbol = 'ZMW';
+            
+            if (CONFIG.currency === 'USD') {
+                displayAmount = amountInZMW / CONFIG.exchangeRate;
+                symbol = '$';
+            }
+
+            // Format numbers nicely
+            const formatted = displayAmount.toLocaleString('en-ZM', { 
+                minimumFractionDigits: 0, 
+                maximumFractionDigits: 0 
+            });
+
+            // For smaller values (tickets), show decimals
+            if (displayAmount < 1000 && CONFIG.currency === 'USD') {
+                return `${symbol} ${displayAmount.toFixed(2)}`;
+            }
+
+            return `${symbol} ${formatted}`;
+        }
+
+        function changeCurrency() {
+            const select = document.getElementById('currencyToggle');
+            CONFIG.currency = select.value;
+            updateAllUI();
+        }
+
+        function updateAllUI() {
+            // Update KPIs
+            document.getElementById('kpi-revenue').innerText = formatMoney(appState.kpi.revenue);
+            document.getElementById('kpi-expenses').innerText = formatMoney(appState.kpi.expenses);
+
+            // Update Charts
+            renderCharts();
+
+            // Update Table Headers/Values (Dynamic tables need re-render)
+            renderRevenueTable(); 
+            
+            // Update Subscription Prices
+            updateSubscriptionPrices();
+
+            // Update Ticketing UI if active
+            if(document.getElementById('ticketing').classList.contains('active')) {
+                updateSeatMap(); // Refreshes prices
+            }
+        }
+
+        function updateSubscriptionPrices() {
+            document.getElementById('price-starter').innerHTML = `${formatMoney(CONFIG.prices.starter)}<span>/mo</span>`;
+            document.getElementById('price-pro').innerHTML = `${formatMoney(CONFIG.prices.pro)}<span>/mo</span>`;
+            document.getElementById('price-ent').innerHTML = `${formatMoney(CONFIG.prices.ent)}<span>/mo</span>`;
+        }
+
+        // --- NAVIGATION LOGIC ---
+        function navigate(viewId) {
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+
+            const titles = {
+                'dashboard': 'Executive Dashboard',
+                'fleet': 'Fleet Management',
+                'ticketing': 'Digital Ticketing',
+                'routes': 'Route Analytics',
+                'finance': 'Financial Reporting',
+                'subscription': 'Subscription Plan'
+            };
+            document.getElementById('page-title').innerText = titles[viewId];
+
+            if(window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('open');
+            }
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        // --- RENDER FUNCTIONS ---
+
+        function renderCharts() {
+            const container = document.getElementById('revenueChart');
+            container.innerHTML = '';
+            
+            // Convert chart data to display currency
+            const maxVal = Math.max(...appState.chartData.map(d => d.value));
+
+            appState.chartData.forEach(d => {
+                const displayValue = formatMoney(d.value * 1000); // Scale back to full number for display
+                // Simple percentage height calc
+                const heightPct = (d.value / maxVal) * 100;
+                
+                const barGroup = document.createElement('div');
+                barGroup.className = 'bar-group';
+                
+                // Create a shorter string for tooltip if needed (e.g. '1.5M')
+                let tooltip = displayValue;
+                if(CONFIG.currency === 'ZMW') tooltip = (d.value * 1000 / 1000000).toFixed(1) + 'M';
+                if(CONFIG.currency === 'USD') tooltip = '$' + (d.value * 1000 / CONFIG.exchangeRate / 1000).toFixed(1) + 'k';
+
+                barGroup.innerHTML = `
+                    <div class="bar" style="height: ${heightPct}%;" data-value="${tooltip}"></div>
+                    <div class="bar-label">${d.label}</div>
+                `;
+                container.appendChild(barGroup);
+            });
+        }
+
+        function renderRevenueTable() {
+            const tbody = document.getElementById('revenueTableBody');
+            tbody.innerHTML = '';
+
+            const tableData = [
+                { bus: 'BAC 456', driver: 'J. Banda', route: 'Lusaka - Livingstone', exp: 8500, col: 8200 },
+                { bus: 'CAC 998', driver: 'M. Phiri', route: 'Lusaka - Ndola', exp: 6200, col: 6250 },
+                { bus: 'BAF 221', driver: 'K. Mwale', route: 'Lusaka - Kitwe', exp: 7000, col: 5500 }, // Big leakage
+            ];
+
+            tableData.forEach(row => {
+                const variance = row.col - row.exp;
+                const isLeak = variance < -200;
+                const status = isLeak ? 'Investigate' : 'Cleared';
+                const statusClass = isLeak ? 'status-maint' : 'status-active';
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${row.bus}</td>
+                    <td>${row.driver}</td>
+                    <td>${row.route}</td>
+                    <td>${formatMoney(row.exp)}</td>
+                    <td>${formatMoney(row.col)}</td>
+                    <td style="color:${variance < 0 ? 'var(--danger)' : 'var(--success)'}">${variance > 0 ? '+' : ''}${formatMoney(Math.abs(variance))}</td>
+                    <td><span class="status-badge ${statusClass}">${status}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderFleetTable() {
+            const tbody = document.getElementById('fleetTableBody');
+            tbody.innerHTML = '';
+            appState.buses.forEach(bus => {
+                const statusMap = { 'active': 'Active', 'maint': 'Maintenance', 'route': 'On Route' };
+                const statusClassMap = { 'active': 'status-active', 'maint': 'status-maint', 'route': 'status-route' };
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${bus.reg}</strong></td>
+                    <td>${bus.model}</td>
+                    <td>${bus.capacity}</td>
+                    <td>${bus.driver}</td>
+                    <td>${bus.depot}</td>
+                    <td>
+                        <div style="display:flex; align-items:center; gap:5px;">
+                            <div style="width:50px; height:6px; background:#e2e8f0; border-radius:3px;">
+                                <div style="width:${bus.fuel}%; height:100%; background:${bus.fuel < 20 ? 'var(--danger)' : 'var(--success)'}; border-radius:3px;"></div>
+                            </div>
+                            <span style="font-size:0.75rem">${bus.fuel}%</span>
+                        </div>
+                    </td>
+                    <td><span class="status-badge ${statusClassMap[bus.status]}">${statusMap[bus.status]}</span></td>
+                    <td>
+                        <button style="border:none; background:none; color:var(--primary); cursor:pointer; margin-right:10px;"><i class="fa-solid fa-eye"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- INTERACTIVE TOOLS ---
+        let selectedSeats = [];
+        
+        function updateSeatMap() {
+            const map = document.getElementById('seatMap');
+            map.innerHTML = '<div class="driver-seat" title="Driver"></div>';
+            
+            // Get current price
+            const routeSelect = document.getElementById('ticketRouteSelect');
+            const routeCode = routeSelect.value;
+            const priceZMW = appState.ticketing[routeCode];
+            
+            for (let i = 1; i <= 24; i++) {
+                const isOccupied = Math.random() < 0.4; 
+                const seat = document.createElement('div');
+                seat.className = `seat ${isOccupied ? 'occupied' : ''}`;
+                seat.innerText = i;
+                
+                if (!isOccupied) {
+                    seat.onclick = () => toggleSeat(i, seat);
+                }
+                if (i % 2 === 0 && i !== 24) {
+                   const aisle = document.createElement('div');
+                   aisle.className = 'aisle';
+                   map.appendChild(aisle);
+                }
+                map.appendChild(seat);
+            }
+            updateBookingSummary(priceZMW);
+        }
+
+        function toggleSeat(id, element) {
+            if (selectedSeats.includes(id)) {
+                selectedSeats = selectedSeats.filter(s => s !== id);
+                element.classList.remove('selected');
+            } else {
+                selectedSeats.push(id);
+                element.classList.add('selected');
+            }
+            
+            // Refresh summary
+            const routeSelect = document.getElementById('ticketRouteSelect');
+            const price = appState.ticketing[routeSelect.value];
+            updateBookingSummary(price);
+        }
+
+        function updateBookingSummary(priceZMW) {
+            const routeSelect = document.getElementById('ticketRouteSelect');
+            const displayPrice = formatMoney(priceZMW);
+            const totalZMW = selectedSeats.length * priceZMW;
+            const displayTotal = formatMoney(totalZMW);
+
+            document.getElementById('summaryRoute').innerText = routeSelect.options[routeSelect.selectedIndex].text.split('(')[0].trim();
+            document.getElementById('summarySeats').innerText = selectedSeats.length > 0 ? selectedSeats.join(', ') : 'None';
+            document.getElementById('summaryPrice').innerText = displayPrice;
+            document.getElementById('summaryTotal').innerText = displayTotal;
+        }
+
+        function processPayment(method) {
+            if (selectedSeats.length === 0) {
+                showToast('Please select at least one seat.', 'error');
+                return;
+            }
+            
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                
+                const routeSelect = document.getElementById('ticketRouteSelect');
+                const priceZMW = appState.ticketing[routeSelect.value];
+                const totalZMW = selectedSeats.length * priceZMW;
+                
+                showToast(`Payment of ${formatMoney(totalZMW)} successful via ${method}!`, 'success');
+                selectedSeats = [];
+                updateSeatMap();
+            }, 1500);
+        }
+
+        // Route Visualizer (Canvas)
+        function initRouteCanvas() {
+            const canvas = document.getElementById('routeCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+
+            let busProgress = 0;
+
+            function draw() {
+                ctx.fillStyle = '#1e293b';
+                ctx.fillRect(0, 0, rect.width, rect.height);
+
+                // Route Line: Lusaka to Livingstone
+                ctx.beginPath();
+                ctx.moveTo(50, rect.height / 2);
+                ctx.lineTo(rect.width - 50, rect.height / 2);
+                ctx.strokeStyle = '#334155';
+                ctx.lineWidth = 4;
+                ctx.setLineDash([10, 10]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // Stops
+                const stops = [
+                    {x: 50, name: 'Lusaka'}, 
+                    {x: 250, name: 'Kafue'}, 
+                    {x: 450, name: 'Choma'}, 
+                    {x: 650, name: 'Mazabuka'}, 
+                    {x: 850, name: 'Livingstone'}
+                ];
+                
+                stops.forEach((stop, index) => {
+                    ctx.beginPath();
+                    ctx.arc(stop.x, rect.height / 2, 8, 0, Math.PI * 2);
+                    ctx.fillStyle = '#10b981';
+                    ctx.fill();
+                    
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.font = '12px Arial';
+                    ctx.fillText(stop.name, stop.x - 20, rect.height / 2 + 30);
+
+                    if (Math.random() > 0.5) {
+                        ctx.fillStyle = 'rgba(245, 158, 11, 0.3)';
+                        ctx.fillRect(stop.x - 20, rect.height / 2 - 40, 40, 80);
+                    }
+                });
+
+                // Moving Bus
+                busProgress += 2;
+                if (busProgress > rect.width) busProgress = 0;
+
+                const busX = 50 + busProgress;
+                
+                ctx.fillStyle = '#ff9800'; // Zambia accent
+                ctx.roundRect(busX - 15, rect.height / 2 - 10, 30, 20, 5);
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(busX, rect.height / 2, 30, 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(255, 152, 0, ${1 - busProgress/rect.width})`;
+                ctx.lineWidth = 1;
+                ctx.stroke();
+
+                requestAnimationFrame(draw);
+            }
+            draw();
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icon = type === 'success' ? '<i class="fa-solid fa-circle-check" style="color:var(--success)"></i>' : '<i class="fa-solid fa-circle-exclamation" style="color:var(--danger)"></i>';
+            
+            toast.innerHTML = `${icon} <span>${message}</span>`;
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // --- INITIALIZATION ---
+        window.addEventListener('DOMContentLoaded', () => {
+            updateAllUI(); // Initial render with default currency
+            renderFleetTable();
+            updateSeatMap();
+            initRouteCanvas();
+        });
+
+    </script>
+</body>
+</html>
